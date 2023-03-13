@@ -5,21 +5,18 @@ import glob
 studydir = "/data/sbdp/PHOENIX/GENERAL/BLS"
 
 def get_vals(file_path):
-  # define search paths
-  #regex1 = "\bqc_sSNR:\s+\K\S+"
-  #regex2 = "\mot_abs_xyz_max:\s+\K\S+"
+    #define search paths
 
-  #regex1a = "\bqc_sSNR:\s+\K\S+"
-  regex1b = "[\n\r].*qc_sSNR:\s*([^\n\r]*)"
-  regex2b = "[\n\r].*mot_abs_xyz_max:\s*([^\n\r]*)"
+    regex_qcsnr = "[\n\r].*qc_sSNR\s*([^\n\r]*)"
+    regex_motabs = "[\n\r].*mot_abs_xyz_max\s*([^\n\r]*)"
 
-  # open txt file
-  with open(file_path, 'r') as file:
-    # read all content of a file
-    content = file.read()
-    # check if string present in a file
-    res1 = re.findall(regex1b, content)
-    res2 = re.findall(regex2b, content)
+    # open txt file
+    with open(file_path, 'r') as file:
+        # read all content of a file
+        content = file.read()
+        # check if string present in a file
+        res1 = re.findall(regex_qcsnr, content, re.MULTILINE)
+        res2 = re.findall(regex_motabs, content, re.MULTILINE)
     
     return res1, res2
 
@@ -47,7 +44,7 @@ for subj in next(os.walk(studydir))[1]:
                             restRpt_path = glob.glob(os.path.join(rsExtd_dir,'*_auto_report.txt'))
                             
                             try:
-                                r1,r2 = get_vals(restRpt_path[0])                    
+                                r1, r2 = get_vals(restRpt_path[0])                    
                                 print(r1)
                                 print(r2)
 
@@ -65,8 +62,8 @@ for subj in next(os.walk(studydir))[1]:
                             tkRpt_path = glob.glob(os.path.join(tkExtd_dir, '*_auto_report.txt'))
                             
                             try:
-                                print(tkRpt_path[0])
-                            
+                                #print(tkRpt_path[0])
+                            	pass
                             except IndexError:
                                 pass
 
