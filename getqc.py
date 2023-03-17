@@ -1,6 +1,7 @@
 import re
 import os
 import glob
+import pandas as pd
 
 studydir = "/data/sbdp/PHOENIX/GENERAL/BLS"
 
@@ -24,6 +25,8 @@ def get_vals(file_path):
   # regex1b = "[\n\r].*qc_sSNR:\s*([^\n\r]*)"
 
 ## main ##
+df = []
+
 for subj in next(os.walk(studydir))[1]:
     procmri_dir = os.path.join(studydir, subj,'mri', 'processed','process_mri')
 
@@ -44,14 +47,12 @@ for subj in next(os.walk(studydir))[1]:
                             restRpt_path = glob.glob(os.path.join(rsExtd_dir,'*_auto_report.txt'))
                             
                             try:
-                                r1, r2 = get_vals(restRpt_path[0])                    
-                                print(r1)
-                                print(r2)
-
+                                r1, r2 = get_vals(restRpt_path[0])
+                                df.rest = pd.DataFrame({"SubjID": subj, "SessionID": mri_session, "Type": "REST",
+                                              "Run": restRun, "qc_sSNR": r1[0], "mot_abs_xyz_max": r2[0]})    
+                                df.append(df.rest)
                             except IndexError:
                                 pass
-
-                            
 
                 if os.path.exists(task_dir):
                     for taskRun in next(os.walk(task_dir))[1]:
@@ -62,13 +63,17 @@ for subj in next(os.walk(studydir))[1]:
                             tkRpt_path = glob.glob(os.path.join(tkExtd_dir, '*_auto_report.txt'))
                             
                             try:
-                                #print(tkRpt_path[0])
-                            	pass
+                                r1, r2 = get_vals(tkRpt_path[0])
+                                df.task = pd.DataFrame({"SubjID": subj, "SessionID": mri_session, "Type": "TASK",
+                                              "Run": taskRun, "qc_sSNR": r1[0], "mot_abs_xyz_max": r2[0]})
+                                df.append(df.task)
+
                             except IndexError:
                                 pass
 
 
-
+df = pd.concat(df)
+print(df)
 
 
 
