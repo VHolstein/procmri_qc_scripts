@@ -35,6 +35,7 @@ for subj in next(os.walk(studydir))[1]:
         for mri_session in next(os.walk(procmri_dir))[1]:
             bqc_dir = os.path.join(procmri_dir,mri_session,'qc','boldqc')
             cbig_dir = os.path.join(procmri_dir, "cbig", mri_session, "surf")
+            hshng_dir = os.path.join(procmri_dir, "hesheng", mri_session, "surf")
             # get niipath file
             npt_dir = os.path.join(procmri_dir, "cbig", "niipaths")
             npt_nme = subj + "_" + mri_session + "_run_info.csv"
@@ -66,7 +67,8 @@ for subj in next(os.walk(studydir))[1]:
                                 cbig_str = "*bld" + cbig_num + "*"
                                 df_rest = pd.DataFrame({"SubjID": [subj], "SessionID": [mri_session], "Type": ["REST"],
                                                         "Run": [restRun], "cbig_num": [cbig_num], "cbig_dir": [cbig_dir],
-                                                        "cbig_str": [cbig_str],"qc_sSNR": [r1[0]], "mot_abs_xyz_max": [r2[0]]})    
+                                                        "cbig_str": [cbig_str], "hesheng_dir": [hshng_dir],
+                                                        "qc_sSNR": [r1[0]], "mot_abs_xyz_max": [r2[0]]})    
                                 df.append(df_rest)
                             except IndexError:
                                 pass
@@ -85,7 +87,8 @@ for subj in next(os.walk(studydir))[1]:
                                 cbig_str = "*bld" + cbig_num + "*"
                                 df_task = pd.DataFrame({"SubjID": [subj], "SessionID": [mri_session], "Type": ["TASK"],
                                                         "Run": [taskRun], "cbig_num": [cbig_num], "cbig_dir": [cbig_dir],
-                                                        "cbig_str": [cbig_str], "qc_sSNR": [r1[0]], "mot_abs_xyz_max": [r2[0]]})
+                                                        "cbig_str": [cbig_str], "hesheng_dir": [hshng_dir],
+                                                        "qc_sSNR": [r1[0]], "mot_abs_xyz_max": [r2[0]]})
                                 df.append(df_task)
 
                             except IndexError:
