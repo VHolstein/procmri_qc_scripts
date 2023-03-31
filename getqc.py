@@ -2,6 +2,7 @@ import re
 import os
 import glob
 import pandas as pd
+import pdb
 
 studydir = "/data/sbdp/PHOENIX/GENERAL/BLS"
 
@@ -33,6 +34,19 @@ for subj in next(os.walk(studydir))[1]:
     if os.path.exists(procmri_dir):
         for mri_session in next(os.walk(procmri_dir))[1]:
             bqc_dir = os.path.join(procmri_dir,mri_session,'qc','boldqc')
+            cbig_dir = os.path.join(procmri_dir, "cbig", mri_session, "surf")
+            # get niipath file
+            npt_dir = os.path.join(procmri_dir, "cbig", "niipaths")
+            npt_nme = subj + "_" + mri_session + "_run_info.csv"
+            npt_pth = os.path.join(npt_dir, npt_nme)
+            try:
+                npt_csv = pd.read_csv(npt_pth, dtype={'cbig_num': str})
+            except FileNotFoundError:
+                print("No npt path for: ", npt_pth)
+                pass
+            except pd.errors.EmptyDataError:
+                print("Empty data for ", npt_pth)
+                pass
 
             if os.path.exists(bqc_dir):
                 rest_dir = os.path.join(bqc_dir,'REST')
@@ -48,9 +62,12 @@ for subj in next(os.walk(studydir))[1]:
                             
                             try:
                                 r1, r2 = get_vals(restRpt_path[0])
-                                df.rest = pd.DataFrame({"SubjID": subj, "SessionID": mri_session, "Type": "REST",
-                                              "Run": restRun, "qc_sSNR": r1[0], "mot_abs_xyz_max": r2[0]})    
-                                df.append(df.rest)
+                                cbig_num = npt_csv.loc[npt_csv['run_num'] == int(restRun), 'cbig_num'].iloc[0]
+                                cbig_str = "*bld" + cbig_num + "*"
+                                df_rest = pd.DataFrame({"SubjID": [subj], "SessionID": [mri_session], "Type": ["REST"],
+                                                        "Run": [restRun], "cbig_num": [cbig_num], "cbig_dir": [cbig_dir],
+                                                        "cbig_str": [cbig_str],"qc_sSNR": [r1[0]], "mot_abs_xyz_max": [r2[0]]})    
+                                df.append(df_rest)
                             except IndexError:
                                 pass
 
@@ -64,16 +81,19 @@ for subj in next(os.walk(studydir))[1]:
                             
                             try:
                                 r1, r2 = get_vals(tkRpt_path[0])
-                                df.task = pd.DataFrame({"SubjID": subj, "SessionID": mri_session, "Type": "TASK",
-                                              "Run": taskRun, "qc_sSNR": r1[0], "mot_abs_xyz_max": r2[0]})
-                                df.append(df.task)
+                                cbig_num = npt_csv.loc[npt_csv['run_num'] == int(taskRun), 'cbig_num'].iloc[0]
+                                cbig_str = "*bld" + cbig_num + "*"
+                                df_task = pd.DataFrame({"SubjID": [subj], "SessionID": [mri_session], "Type": ["TASK"],
+                                                        "Run": [taskRun], "cbig_num": [cbig_num], "cbig_dir": [cbig_dir],
+                                                        "cbig_str": [cbig_str], "qc_sSNR": [r1[0]], "mot_abs_xyz_max": [r2[0]]})
+                                df.append(df_task)
 
                             except IndexError:
                                 pass
 
 
 df = pd.concat(df)
-print(df)
+df.to_csv('/PHShome/vlh14/Downloads/BLSqc.csv', index=None)
 
 
 
